@@ -1,4 +1,5 @@
 import { reactive, readonly } from 'vue'
+import axios from 'axios'
 import { Post } from './mocks'
 
 interface State {
@@ -7,7 +8,9 @@ interface State {
 
 interface PostsState {
   ids: string[] // [1, 2, 3, 4]
+
   all: Map<string, Post>
+  
   loaded: boolean
 }
 
@@ -20,6 +23,22 @@ class Store {
 
   getState() {
     return readonly(this.state)
+  }
+
+  async fecthPost() {
+    const response = await axios.get<Post[]>('/posts')
+    const postsState: PostsState = {
+      ids: [],
+      all: new Map,
+      loaded: true
+    }
+
+    for (const post of response.data) {
+      postsState.ids.push(post.id)
+      postsState.all.set(post.id, post)
+    }
+    
+    this.state.posts = postsState
   }
 }
 
